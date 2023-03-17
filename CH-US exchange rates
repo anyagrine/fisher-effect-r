@@ -1,0 +1,23 @@
+library(readxl)
+CH_US_DATA <- read_excel("~/Downloads/CH_US_DATA.xls", skip = 10)
+attach(CH_US_DATA)
+
+# a 
+
+plot(DATE, Inflation_CH,
+     main = "Inflation CH",
+     ylab = "Annual Inflation in %",
+     xlab = "",
+     type="l")
+
+plot(DATE, Inflation_CH,
+     main = "Inflation CH",
+     ylab = "Annual Inflation in %",
+     xlab = "",
+     type="l") # SNB Target
+abline(h=c(0,2), col="green")
+#Periods with Higher inflation
+abline(v=DATE[which(Inflation_CH>2)[!((which(Inflation_CH>2)+1) %in%
+                                        which(Inflation_CH>2))]+1], col="gray")
+abline(v=DATE[which(Inflation_CH<=2)[!((which(Inflation_CH<=2)+1) %in%
+                                         which(Inflation_CH<=2))]+1], col="gray")
