@@ -1,0 +1,50 @@
+#The file USA.xls contains the real interest rate and the consumer price index (CPI) in the US.
+#Compute the annualized inflation rate based on the CPI index.
+#Drop the CPI and keep only the years with no missing values for both variables.
+#Merge the data set with the FED Funds Rates from task 1 and export it as a csv file.
+#Calculate the real interest rate as expected by the fisher effect.
+#Plot this expected real interest rate together with the observed real interest rate.
+#Style the diagram appropriate. 
+
+US_nominal <- read.csv("~/Downloads/FEDFUNDS.csv") 
+US_nominal$DATE <- as.POSIXct(US_nominal$DATE, tz = "UTC")
+#Exploring the Head
+head(US_nominal)
+tail(US_nominal)
+plot(US_nominal$DATE, US_nominal$FEDFUNDS, type="l",
+     main = "Plot 1: FED Funds Rates from 1954 to 2022",
+     xlab = "",
+     ylab= "FED Fund Rate in %" )
+
+library(readxl)
+US_DATA <- read_excel("~/Downloads/USA.xls", skip = 11)
+head(US_DATA)
+US_DATA$inflation <- rep(NA,times=length(US_DATA$CPIAUCSL))
+for(i in 1:(length(US_DATA$CPIAUCSL)-1)){
+  US_DATA$inflation[i+1] <- (US_DATA$CPIAUCSL[i+1]/US_DATA$CPIAUCSL[i])-1 # Annualize
+  US_DATA$inflation[i+1] <- (((1 + US_DATA$inflation[i+1])^12)-1) *100
+}
+
+head(US_DATA)
+
+US_DATA <- US_DATA[,-2]
+US_DATA <- na.omit(US_DATA)
+colnames(US_DATA) <- c("DATE", "real_interest_rate", "Inflation")
+head(US_DATA)
+
+merged_data <- merge(x=US_DATA, y=US_nominal, by="DATE")
+head(merged_data)
+
+write.table(merged_data, file="my_US_Data.csv", row.names = F, sep=",")
+
+US_DATA <- merged_data
+# Compute the real interest rate based on the fisher effect
+US_DATA$fisher_real_rate <- US_DATA$FEDFUNDS - US_DATA$Inflation
+plot(US_DATA$DATE, US_DATA$fisher_real_rate, type = "l", col = "red",
+     main = "Plot 2: Fisher effect",
+     xlab = "",
+     ylab = "real interest rates in %")
+lines(US_DATA$DATE, US_DATA$real_interest_rate, col="blue")
+# Add a legend
+legend(x=US_DATA$DATE[1], y=-5,legend=c("real rate data", "real rate fisher effect"),
+       lty=1, col=c("blue", "red"))
