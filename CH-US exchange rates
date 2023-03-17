@@ -2,7 +2,10 @@ library(readxl)
 CH_US_DATA <- read_excel("~/Downloads/CH_US_DATA.xls", skip = 10)
 attach(CH_US_DATA)
 
-# a 
+# 1. The data set CH_US_DATA.xls contains the inflation rate for Switzerland and the US.
+The SNB has the goal to keep inflation between 0% and 2%.
+Mark this region in the plot, with two horizontal lines. Mark all periods for which the goal was not achieved. 
+
 
 plot(DATE, Inflation_CH,
      main = "Inflation CH",
@@ -21,3 +24,44 @@ abline(v=DATE[which(Inflation_CH>2)[!((which(Inflation_CH>2)+1) %in%
                                         which(Inflation_CH>2))]+1], col="gray")
 abline(v=DATE[which(Inflation_CH<=2)[!((which(Inflation_CH<=2)+1) %in%
                                          which(Inflation_CH<=2))]+1], col="gray")
+                                         
+                                         
+# 2. Compute the expected change in △CHF/USD given CH and US Inflation.
+# Configure 2 plots: one for the expected change in △CHF/USD due to PPP, 2d to the the level of the observed exchange rate CHF/USD.
+
+expected_exchange_rate <- Inflation_CH - Inflation_US
+expected_exchange_rate
+
+exchange_rate <- read_excel("~/Downloads/exchangerate.xls", skip = 10)
+saved.par <- par()
+par(mfrow = c(2,1))
+plot(DATE[12:length(DATE)],
+     main="Change in the exchange rates predicted by relative PPP",
+     xlab="",
+     ylab="change in %",
+     expected_exchange_rate[12:length(DATE)],
+     type="l")
+abline(h=0, col="gray")
+plot(exchange_rate$observation_date, exchange_rate$DEXSZUS, type="l",
+     main="Swiss francs to US Dollar exchange rate",
+     xlab="",
+     ylab="CHF/USD"
+)
+par(saved.par)
+jpeg("Plot_1.jpg", width = 700, height = 700)
+saved.par <- par()
+par(mfrow = c(2,1))
+
+plot(DATE[11:length(DATE)],
+     main="Change in the exchange rates predicted by relative PPP",
+     xlab="",
+     ylab="change in %",
+     expected_exchange_rate[11:length(DATE)],
+     type="l")
+abline(h=0, col="gray")
+#Plot exchange rate
+plot(exchange_rate$observation_date, exchange_rate$DEXSZUS, type="l",
+     main="Swiss francs to US Dollar exchange rate",
+     xlab="",
+     ylab="CHF/USD"
+)
